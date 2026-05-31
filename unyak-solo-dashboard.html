@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Unyak</title>
+<style>
+  :root{
+    --bg:#faf9f5; --surface:#ffffff; --surface2:#f3f1ea; --surface3:#edeae1;
+    --drawer:#f4f2ec; --text:#1f1e1c; --text2:#6b6a64; --text3:#9a988f; --border:rgba(0,0,0,0.1);
+    --blue:#185fa5; --blue-bg:#e6f1fb; --purple:#534ab7; --purple-bg:#eeedfe;
+    --green:#3b6d11; --green-bg:#eaf3de; --amber:#854f0b; --amber-bg:#faeeda;
+    --red:#a32d2d; --red-bg:#fcebeb; --gray:#5f5e5a; --gray-bg:#f1efe8;
+    --radius:8px; --radius-lg:12px;
+    --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#1c1b19; --surface:#262522; --surface2:#2f2e2a; --surface3:#3a3833; --drawer:#211f1d;
+      --text:#f3f1ea; --text2:#a8a69d; --text3:#7a7870; --border:rgba(255,255,255,0.12);
+      --blue:#85b7eb; --blue-bg:#0c2f4d; --purple:#afa9ec; --purple-bg:#2a2553;
+      --green:#97c459; --green-bg:#24380e; --amber:#ef9f27; --amber-bg:#3d2a08;
+      --red:#f09595; --red-bg:#3d1414; --gray:#b4b2a9; --gray-bg:#33322e;
+    }
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0; height:100%;}
+  body{background:var(--bg); color:var(--text); font-family:var(--font); font-size:15px; line-height:1.5;}
+  .app{display:flex; height:100vh; overflow:hidden;}
+
+  .drawer{width:248px; flex-shrink:0; background:var(--drawer); border-right:0.5px solid var(--border); display:flex; flex-direction:column; padding:12px;}
+  .switcher{position:relative; margin-bottom:8px;}
+  .switcher-btn{display:flex; align-items:center; gap:9px; width:100%; padding:9px 10px; border-radius:var(--radius); border:0.5px solid var(--border); background:var(--surface); cursor:pointer;}
+  .switcher-btn:hover{background:var(--surface2);}
+  .switcher-btn .dot{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
+  .switcher-btn .nm{flex:1; font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:left;}
+  .switcher-btn .g{font-size:10px; color:var(--text3); text-transform:uppercase;}
+  .switcher-btn .cv{color:var(--text3); font-size:11px;}
+  .menu{position:absolute; top:46px; left:0; right:0; background:var(--surface); border:0.5px solid var(--border); border-radius:var(--radius); padding:5px; z-index:10; display:none;}
+  .menu.open{display:block;}
+  .menu .mi{display:flex; align-items:center; gap:9px; padding:8px 9px; border-radius:6px; cursor:pointer; font-size:14px;}
+  .menu .mi:hover{background:var(--surface2);}
+  .menu .mi .dot{width:8px; height:8px; border-radius:50%;}
+  .menu .mi .g{font-size:10px; color:var(--text3); text-transform:uppercase; margin-left:auto;}
+  .menu .sep{height:0.5px; background:var(--border); margin:5px 0;}
+  .menu .mi.new{color:var(--blue);}
+
+  .newbtn{display:flex; align-items:center; gap:8px; width:100%; padding:10px 12px; border-radius:var(--radius); border:0.5px solid var(--border); background:var(--surface); color:var(--text); font-size:14px; font-weight:500; cursor:pointer; margin-bottom:14px;}
+  .newbtn:hover{background:var(--surface2);}
+  .navsec{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--text3); margin:8px 8px 6px;}
+  .navitem{display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:var(--radius); font-size:14px; color:var(--text2); cursor:pointer;}
+  .navitem:hover{background:var(--surface2); color:var(--text);}
+  .navitem.active{background:var(--surface2); color:var(--text); font-weight:500;}
+  .navitem .ico{width:16px; text-align:center; font-size:14px;}
+  .navitem .cv{margin-left:auto; font-size:11px; color:var(--text3); transition:transform .15s;}
+  .navitem.exp .cv{transform:rotate(90deg);}
+  .subwrap{display:none;} .subwrap.open{display:block;}
+  .subitem{display:flex; align-items:center; gap:8px; padding:6px 10px 6px 34px; border-radius:var(--radius); font-size:13.5px; color:var(--text2); cursor:pointer;}
+  .subitem:hover{background:var(--surface2); color:var(--text);}
+  .subitem .ico{font-size:13px; width:14px; text-align:center;}
+  .drawer-foot{margin-top:auto; border-top:0.5px solid var(--border); padding-top:10px;}
+
+  .main{flex:1; overflow-y:auto; display:flex; flex-direction:column;}
+  .main-inner{max-width:680px; margin:0 auto; padding:30px 28px 60px; width:100%;}
+
+  /* CENTERED OVERVIEW — fills main, centers both axes */
+  #view-overview.view.active{flex:1; display:flex;}
+  .home{flex:1; width:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px;}
+  .home-inner{width:100%; max-width:540px;}
+  .greet{text-align:center; font-size:26px; font-weight:600; margin:0 0 22px;}
+  .ready{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:22px;}
+  .tile{border-radius:14px; padding:16px; cursor:pointer; border:0.5px solid var(--border); background:var(--surface); text-align:center;}
+  .tile:hover{border-color:var(--text3);}
+  .tile .tl{font-size:12.5px; color:var(--text2); margin:0 0 8px; display:flex; align-items:center; justify-content:center; gap:6px;}
+  .tile .tdot{width:9px; height:9px; border-radius:50%;}
+  .tile .pct{font-size:28px; font-weight:600; margin:0; line-height:1;}
+  .tile .cap{font-size:11.5px; color:var(--text3); margin:7px 0 0;}
+
+  .cbox{border:0.5px solid var(--border); border-radius:18px; background:var(--surface); padding:6px; box-shadow:0 1px 2px rgba(0,0,0,0.03);}
+  .cbox:focus-within{border-color:var(--text3);}
+  .cbox textarea{width:100%; border:none; background:none; resize:none; color:var(--text); font-family:var(--font); font-size:15px; padding:12px 12px 6px; outline:none; max-height:160px; line-height:1.5;}
+  .cbox-row{display:flex; align-items:center; gap:6px; padding:2px 6px 4px;}
+  .cb-btn{display:flex; align-items:center; gap:6px; height:34px; padding:0 10px; border-radius:18px; border:0.5px solid var(--border); background:var(--surface); color:var(--text2); font-size:13px; cursor:pointer;}
+  .cb-btn:hover{background:var(--surface2); color:var(--text);}
+  .cb-icon{width:34px; height:34px; border-radius:50%; border:0.5px solid var(--border); background:var(--surface); color:var(--text2); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:15px;}
+  .cb-icon:hover{background:var(--surface2); color:var(--text);}
+  .cb-send{width:34px; height:34px; border-radius:50%; border:none; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; margin-left:auto;}
+  .cb-send:hover{opacity:.9;}
+  .home-sug{display:flex; gap:7px; flex-wrap:wrap; justify-content:center; margin-top:16px;}
+  .home-sug .s{font-size:12.5px; padding:6px 12px; border-radius:20px; border:0.5px solid var(--border); background:var(--surface); color:var(--text2); cursor:pointer;}
+  .home-sug .s:hover{background:var(--surface2); color:var(--text);}
+
+  .view{display:none;} .view.active{display:block;}
+  .sec-label{font-size:12.5px; font-weight:500; color:var(--text2); margin:0 0 10px;}
+  .prog{height:8px; background:var(--surface3); border-radius:20px; overflow:hidden; margin:4px 0 18px;}
+  .prog>div{height:100%; border-radius:20px;}
+  .item{background:var(--surface); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:14px 16px; margin-bottom:10px;}
+  .item-top{display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;}
+  .item-title{font-size:15px; font-weight:500; margin:0;}
+  .item-why{font-size:12.5px; color:var(--text2); margin:6px 0 0;}
+  .item-body{font-size:13.5px; color:var(--text2); margin:7px 0 0;}
+  .pill{font-size:11.5px; padding:3px 10px; border-radius:20px; font-weight:500; white-space:nowrap;}
+  .pill.done,.pill.setup{background:var(--green-bg); color:var(--green);}
+  .pill.partial,.pill.needed{background:var(--amber-bg); color:var(--amber);}
+  .pill.empty{background:var(--gray-bg); color:var(--gray);}
+  .pill.chosen{background:var(--blue-bg); color:var(--blue);}
+  .act{font-size:12.5px; color:var(--blue); background:none; border:none; cursor:pointer; padding:0; margin-top:10px; font-weight:500;}
+  .opts{display:flex; gap:6px; flex-wrap:wrap; margin-top:10px;}
+  .opt{font-size:12px; padding:5px 11px; border-radius:20px; border:0.5px solid var(--border); background:var(--bg); color:var(--text2); cursor:pointer;}
+  .opt:hover{background:var(--surface2); color:var(--text);}
+  .btn{font-size:14px; padding:9px 15px; border-radius:var(--radius); border:0.5px solid var(--border); background:var(--surface); color:var(--text); cursor:pointer; font-weight:500;}
+  .btn:hover{background:var(--surface2);} .btn.primary{background:var(--blue); color:#fff; border-color:var(--blue);}
+  .btn.sm{font-size:13px; padding:6px 12px; font-weight:400;}
+
+  .plan-item{display:flex; gap:12px; background:var(--surface); border:0.5px solid var(--border); border-radius:var(--radius-lg); padding:14px 16px; margin-bottom:10px; align-items:flex-start;}
+  .plan-num{width:26px; height:26px; border-radius:50%; background:var(--surface2); color:var(--text2); font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-weight:600;}
+  .plan-num.blocked{background:var(--red-bg); color:var(--red);} .plan-num.ready{background:var(--blue-bg); color:var(--blue);}
+  .plan-title{font-size:14.5px; font-weight:500; margin:0;}
+  .plan-meta{font-size:12.5px; color:var(--text2); margin:4px 0 0;}
+  .plan-tagrow{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; align-items:center;}
+
+  .tl-item{position:relative; padding:0 0 16px 15px; border-left:0.5px solid var(--border);}
+  .tl-item:last-child{border-left-color:transparent;}
+  .tl-dot{position:absolute; left:-5px; top:4px; width:9px; height:9px; border-radius:50%;}
+  .tl-time{font-size:11.5px; color:var(--text3);} .tl-text{font-size:13.5px; margin:1px 0 0;}
+  .tag{font-size:10.5px; padding:1px 7px; border-radius:6px; margin-right:6px; font-weight:500;}
+
+  .log-controls{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:11px; align-items:center;}
+  .chip{font-size:11.5px; padding:5px 11px; border-radius:20px; border:0.5px solid var(--border); background:var(--surface); color:var(--text2); cursor:pointer;}
+  .chip.on{background:var(--text); color:var(--bg); border-color:var(--text);}
+  .raw{background:var(--surface); border:0.5px solid var(--border); border-radius:var(--radius); font-family:var(--mono); font-size:12px; line-height:1.7; max-height:340px; overflow:auto;}
+  .raw-row{display:flex; gap:10px; padding:4px 12px; border-bottom:0.5px solid var(--border);}
+  .raw-ts{color:var(--text3); white-space:nowrap; font-size:11px;}
+  .raw-type{white-space:nowrap; font-weight:600; text-transform:uppercase; font-size:10px; min-width:58px;}
+  .raw-msg{color:var(--text); word-break:break-word;}
+
+  /* GH-STYLE FILE EDITOR */
+  .file-head{display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap;}
+  .file-name{font-family:var(--mono); font-size:13.5px; font-weight:500; margin-right:auto; display:flex; align-items:center; gap:7px;}
+  .file-name .fi{color:var(--text3);}
+  .seg{display:inline-flex; border:0.5px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+  .seg button{font-size:13px; padding:6px 12px; border:none; background:var(--surface); color:var(--text2); cursor:pointer; border-right:0.5px solid var(--border);}
+  .seg button:last-child{border-right:none;}
+  .seg button:hover{background:var(--surface2); color:var(--text);}
+  .seg button.on{background:var(--surface3); color:var(--text); font-weight:500;}
+  .gh-btn{font-size:13px; padding:6px 12px; border-radius:var(--radius); border:0.5px solid var(--border); background:var(--surface); color:var(--text); cursor:pointer; display:inline-flex; align-items:center; gap:6px;}
+  .gh-btn:hover{background:var(--surface2);}
+  .gh-btn.commit{background:var(--green); color:#fff; border-color:var(--green);}
+  .gh-btn.commit:hover{opacity:.92;}
+  .file{background:var(--surface); border:0.5px solid var(--border); border-radius:var(--radius); font-family:var(--mono); font-size:12.5px; line-height:1.6; padding:14px 16px; white-space:pre-wrap; color:var(--text2);}
+  .ta{width:100%; min-height:62px; border-radius:var(--radius); border:0.5px solid var(--border); background:var(--bg); color:var(--text); padding:10px; font-family:var(--font); font-size:13.5px;}
+  .file-raw{width:100%; min-height:300px; border-radius:var(--radius); border:0.5px solid var(--border); background:var(--bg); color:var(--text); padding:14px; font-family:var(--mono); font-size:12.5px; line-height:1.6;}
+  .hint{font-size:12px; color:var(--text3); margin:10px 0 0;}
+  .save-row{display:flex; gap:8px; margin-top:12px; align-items:center;}
+
+  /* history */
+  .hist-item{display:flex; gap:12px; padding:11px 0; border-bottom:0.5px solid var(--border); align-items:flex-start;}
+  .hist-item:last-child{border-bottom:none;}
+  .hist-dot{width:9px; height:9px; border-radius:50%; margin-top:5px; flex-shrink:0;}
+  .hist-msg{font-size:14px; margin:0;}
+  .hist-meta{font-size:12px; color:var(--text3); margin:2px 0 0;}
+  .hist-view{font-size:12.5px; color:var(--blue); background:none; border:none; cursor:pointer; padding:0; margin-left:auto; white-space:nowrap;}
+
+  .back{font-size:13px; color:var(--text2); background:none; border:none; cursor:pointer; padding:0; margin-bottom:16px;}
+  .back:hover{color:var(--text);}
+  .ctx-label{font-size:12px; color:var(--text2); text-transform:uppercase; letter-spacing:.04em; margin:18px 0 8px;}
+  .ctx-row{display:flex; gap:9px; align-items:flex-start; font-size:13.5px; background:var(--surface); border:0.5px solid var(--border); border-radius:var(--radius); padding:9px 12px; margin-bottom:6px;}
+  .ctx-row .ck{color:var(--green); flex-shrink:0;}
+  .promptbox{width:100%; min-height:210px; border-radius:var(--radius-lg); border:0.5px solid var(--border); background:var(--surface); color:var(--text); padding:14px 16px; font-family:var(--mono); font-size:13px; line-height:1.6; resize:vertical; margin-top:8px;}
+  .prompt-actions{display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; align-items:center;}
+  .copied{font-size:13px; color:var(--green);}
+
+  .chatwrap{display:flex; flex-direction:column; height:100%; width:100%;}
+  .chatscroll{flex:1; overflow-y:auto; padding:30px 28px 10px;}
+  .chatinner{max-width:680px; margin:0 auto;}
+  .msg{margin-bottom:18px;} .msg .who{font-size:12px; color:var(--text3); margin:0 0 4px;}
+  .msg.u .bub{background:var(--blue-bg); border-radius:var(--radius-lg); padding:10px 14px; display:inline-block;}
+  .msg.a .bub{font-size:15px;}
+  .composer{padding:14px 28px 20px;}
+  .composer-inner{max-width:680px; margin:0 auto;}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="drawer">
+    <div class="switcher">
+      <button class="switcher-btn" onclick="toggleMenu(event)">
+        <span class="dot" style="background:var(--amber)"></span>
+        <span class="nm">Recipe sharing app</span>
+        <span class="g">Proto</span><span class="cv">&#9662;</span>
+      </button>
+      <div class="menu" id="projmenu">
+        <div class="mi" onclick="pickProj('Recipe sharing app','Proto','var(--amber)')"><span class="dot" style="background:var(--amber)"></span> Recipe sharing app <span class="g">Proto</span></div>
+        <div class="mi" onclick="pickProj('Portfolio site','Prod','var(--green)')"><span class="dot" style="background:var(--green)"></span> Portfolio site <span class="g">Prod</span></div>
+        <div class="sep"></div>
+        <div class="mi new" onclick="say('Start a new Unyak project')"><span style="width:8px;text-align:center;">+</span> New project</div>
+      </div>
+    </div>
+
+    <button class="newbtn" onclick="showChat(true)"><span>&#43;</span> New chat</button>
+
+    <div class="navsec">Build</div>
+    <div class="navitem active" data-nav="overview" onclick="nav('overview')"><span class="ico">&#9632;</span> Overview</div>
+    <div class="navitem" data-nav="prd" onclick="nav('prd')"><span class="ico">&#9634;</span> PRD</div>
+    <div class="navitem" data-nav="stack" onclick="nav('stack')"><span class="ico">&#9707;</span> Stack</div>
+    <div class="navitem" data-nav="features" onclick="nav('features')"><span class="ico">&#10003;</span> Features</div>
+    <div class="navitem" data-nav="plan" onclick="nav('plan')"><span class="ico">&#9776;</span> Plan</div>
+    <div class="navitem" data-nav="activity" onclick="nav('activity')"><span class="ico">&#8635;</span> Activity</div>
+    <div class="navitem" data-nav="raw" onclick="nav('raw')"><span class="ico">&#8801;</span> Raw log</div>
+
+    <div class="navitem" id="files-head" onclick="toggleFiles()"><span class="ico">&#9783;</span> Files <span class="cv">&#9656;</span></div>
+    <div class="subwrap" id="files-sub">
+      <div class="subitem" onclick="nav('files')"><span class="ico">&#9634;</span> agents.md</div>
+      <div class="subitem" onclick="say('Open the decision log')"><span class="ico">&#9634;</span> decisions.md</div>
+      <div class="subitem" onclick="say('Open the error log')"><span class="ico">&#9634;</span> errors.md</div>
+      <div class="subitem" onclick="say('Open the templates folder')"><span class="ico">&#9783;</span> templates</div>
+    </div>
+
+    <div class="drawer-foot">
+      <div class="navitem"><span class="ico">&#9881;</span> Settings</div>
+      <div class="navitem"><span class="ico">&#9650;</span> Upgrade plan</div>
+    </div>
+  </aside>
+
+  <main class="main" id="dash">
+
+    <div id="view-overview" class="view active">
+      <div class="home"><div class="home-inner">
+        <p class="greet">How's the build going?</p>
+        <div class="ready">
+          <button class="tile" onclick="nav('prd')"><p class="tl"><span class="tdot" style="background:var(--green)"></span> PRD</p><p class="pct">80%</p><p class="cap">1 part left</p></button>
+          <button class="tile" onclick="nav('stack')"><p class="tl"><span class="tdot" style="background:var(--amber)"></span> Stack</p><p class="pct">67%</p><p class="cap">1 needed</p></button>
+          <button class="tile" onclick="nav('features')"><p class="tl"><span class="tdot" style="background:var(--blue)"></span> Features</p><p class="pct">60%</p><p class="cap">2 to build</p></button>
+        </div>
+        <div class="cbox">
+          <textarea id="homebox" rows="1" placeholder="Ask anything about your build…"></textarea>
+          <div class="cbox-row">
+            <button class="cb-btn" onclick="say('Change model')"><span>Unyak 4.5</span> <span style="font-size:10px;">&#9662;</span></button>
+            <button class="cb-icon" title="Attach" onclick="say('Attach a file')">&#43;</button>
+            <button class="cb-icon" title="Voice" onclick="say('Voice input')">&#127908;</button>
+            <button class="cb-send" onclick="homeAsk()">&#8593;</button>
+          </div>
+        </div>
+        <div class="home-sug">
+          <span class="s" onclick="homeQuick('Am I on track?')">Am I on track?</span>
+          <span class="s" onclick="homeQuick('What should I build next?')">What's next?</span>
+          <span class="s" onclick="homeQuick('What is missing from my stack?')">What's missing?</span>
+        </div>
+      </div></div>
+    </div>
+
+    <div class="main-inner">
+      <div id="view-prd" class="view"><p class="sec-label">PRD completeness — what you said you're building</p><div class="prog"><div style="width:80%;background:var(--green)"></div></div><div id="prd-list"></div></div>
+      <div id="view-stack" class="view"><p class="sec-label">Services your PRD needs</p><div id="stack-list"></div></div>
+      <div id="view-features" class="view"><p class="sec-label">PRD features vs. what's built</p><div id="feat-list"></div></div>
+      <div id="view-plan" class="view"><p class="sec-label">What to do next, in order</p><div id="plan-list"></div></div>
+      <div id="view-activity" class="view"><p class="sec-label">Timeline</p><div id="timeline"></div></div>
+      <div id="view-raw" class="view"><div class="log-controls"><span class="chip on" data-f="all">All</span><span class="chip" data-f="spec">spec</span><span class="chip" data-f="decision">decision</span><span class="chip" data-f="error">error</span><span class="chip" data-f="debug">debug</span></div><div class="raw" id="raw"></div></div>
+
+      <!-- FILES: GH-style -->
+      <div id="view-files" class="view">
+        <div class="file-head">
+          <span class="file-name"><span class="fi">&#9634;</span> agents.md</span>
+          <div class="seg" id="fileseg">
+            <button data-m="read" class="on" onclick="setMode('read')">Read</button>
+            <button data-m="section" onclick="setMode('section')">Edit sections</button>
+            <button data-m="raw" onclick="setMode('raw')">Raw</button>
+          </div>
+          <button class="gh-btn" onclick="setMode('history')"><span>&#8635;</span> History</button>
+        </div>
+        <div id="file-area"></div>
+      </div>
+
+      <div id="view-build" class="view">
+        <button class="back" onclick="nav(lastView)">&larr; Back</button>
+        <p id="build-sub" style="font-size:15px; font-weight:500; margin:0 0 2px;"></p>
+        <p class="ctx-label">Context Unyak will include</p>
+        <div id="build-ctx"></div>
+        <p class="ctx-label">Your prompt</p>
+        <textarea class="promptbox" id="promptbox"></textarea>
+        <div class="prompt-actions"><button class="btn primary" onclick="copyPrompt()">Copy prompt</button><button class="btn sm" onclick="say('Refine this build prompt')">Ask Unyak to refine</button><span class="copied" id="copied" style="display:none;">Copied</span></div>
+        <p class="hint">Paste into your coding agent. It includes your PRD constraints, stack, and past gotchas.</p>
+      </div>
+    </div>
+  </main>
+
+  <main class="main" id="chat" style="display:none;">
+    <div class="chatwrap">
+      <div class="chatscroll"><div class="chatinner" id="chatlog"><div class="msg a"><p class="who">Unyak</p><div class="bub">Ask me anything about your build.</div></div></div></div>
+      <div class="composer"><div class="composer-inner">
+        <div class="cbox">
+          <textarea id="chatbox" rows="1" placeholder="Ask about this build…"></textarea>
+          <div class="cbox-row">
+            <button class="cb-btn" onclick="say('Change model')"><span>Unyak 4.5</span> <span style="font-size:10px;">&#9662;</span></button>
+            <button class="cb-icon" onclick="say('Attach')">&#43;</button>
+            <button class="cb-icon" onclick="say('Voice')">&#127908;</button>
+            <button class="cb-send" onclick="sendChat()">&#8593;</button>
+          </div>
+        </div>
+      </div></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const COLORS={spec:{c:'--purple',bg:'--purple-bg'},decision:{c:'--blue',bg:'--blue-bg'},error:{c:'--red',bg:'--red-bg'},debug:{c:'--gray',bg:'--gray-bg'},blocker:{c:'--red',bg:'--red-bg'},resolved:{c:'--green',bg:'--green-bg'}};
+function v(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+
+const PRD=[{title:'What we are building',status:'done',body:'A simple app to share and browse recipes.'},{title:'Who it is for',status:'done',body:'Home cooks who want to post and find recipes.'},{title:'Hard constraints',status:'done',body:'Keep it simple — no payments, no accounts beyond sign-in.'},{title:'Stack',status:'done',body:'Supabase for data, simple email sign-in.'},{title:'Data model',status:'partial',body:'Recipes done. Missing: favorites/saved list.'}];
+const SL={done:'Complete',partial:'Partial',empty:'Empty'};
+function renderPRD(){document.getElementById('prd-list').innerHTML=PRD.map(s=>{let a='';if(s.status==='empty')a='<button class="act" onclick="say(\'Define the '+s.title+'\')">Define this &rarr;</button>';else if(s.status==='partial')a='<button class="act" onclick="say(\'Complete the '+s.title+'\')">Complete this &rarr;</button>';return '<div class="item"><div class="item-top"><p class="item-title">'+s.title+'</p><span class="pill '+s.status+'">'+SL[s.status]+'</span></div><p class="item-body">'+s.body+'</p>'+a+'</div>';}).join('');}
+
+const STACK=[{name:'Database',why:'Your PRD needs to store recipes',status:'setup',label:'Set up',detail:'Supabase — connected.',options:[]},{name:'Sign-in',why:'Your PRD needs email sign-in',status:'setup',label:'Set up',detail:'Supabase Auth — connected.',options:[]},{name:'Image hosting',why:'Your PRD needs recipe photos',status:'needed',label:'Needed',detail:'No provider chosen yet.',options:['Supabase Storage','Cloudinary','Uploadcare']}];
+function renderStack(){document.getElementById('stack-list').innerHTML=STACK.map(s=>{let o='';if(s.status==='needed'&&s.options.length)o='<div class="opts">'+s.options.map(x=>'<span class="opt" onclick="say(\'Set up '+x+'\')">'+x+'</span>').join('')+'</div>';let a='';if(s.status==='needed')a='<button class="act" onclick="say(\'Compare image hosting options\')">Compare options &rarr;</button>';else a='<button class="act" onclick="say(\'Show '+s.name+' setup\')">View setup &rarr;</button>';return '<div class="item"><div class="item-top"><p class="item-title">'+s.name+'</p><span class="pill '+s.status+'">'+s.label+'</span></div><p class="item-why">'+s.why+'</p><p class="item-body">'+s.detail+'</p>'+o+a+'</div>';}).join('');}
+
+const FEATS=[{name:'Browse recipes',status:'done'},{name:'View a recipe',status:'done'},{name:'Post a recipe',status:'done'},{name:'Save favorites',status:'empty'},{name:'Upload photos',status:'empty'}];
+const FL={done:'Built',partial:'In progress',empty:'Not built'};
+function renderFeats(){document.getElementById('feat-list').innerHTML=FEATS.map((f,i)=>{let a='';if(f.status!=='done')a='<button class="act" onclick="openBuild('+i+',\'features\')">Build this &rarr;</button>';return '<div class="item"><div class="item-top"><p class="item-title">'+f.name+'</p><span class="pill '+f.status+'">'+FL[f.status]+'</span></div>'+a+'</div>';}).join('');}
+
+const PLAN=[{step:1,state:'ready',title:'Choose image hosting',meta:'Needed before photo upload works',featIdx:4},{step:2,state:'blocked',title:'Build photo upload',meta:'Waiting on step 1',featIdx:4},{step:3,state:'ready',title:'Build save favorites',meta:'Nothing blocking it',featIdx:3}];
+function renderPlan(){document.getElementById('plan-list').innerHTML=PLAN.map(p=>{const cls=p.state==='blocked'?'blocked':'ready';const tag=p.state==='blocked'?'<span class="pill empty">Blocked</span>':'<span class="pill chosen">Ready</span>';const btn=p.state==='blocked'?'':(p.featIdx!=null?'<button class="act" onclick="openBuild('+p.featIdx+',\'plan\')">Build this &rarr;</button>':'');return '<div class="plan-item"><div class="plan-num '+cls+'">'+p.step+'</div><div style="flex:1"><p class="plan-title">'+p.title+'</p><p class="plan-meta">'+p.meta+'</p><div class="plan-tagrow">'+tag+btn+'</div></div></div>';}).join('');}
+
+const TIMELINE=[{t:'10m ago',type:'decision',txt:'Chose Supabase'},{t:'1h ago',type:'resolved',txt:'Fixed recipe list layout'},{t:'2h ago',type:'spec',txt:'PRD updated — added favorites'},{t:'yesterday',type:'spec',txt:'PRD created'}];
+function renderTimeline(){document.getElementById('timeline').innerHTML=TIMELINE.map(e=>{const c=v(COLORS[e.type].c),b=v(COLORS[e.type].bg);return '<div class="tl-item"><span class="tl-dot" style="background:'+c+'"></span><span class="tl-time">'+e.t+'</span><p class="tl-text"><span class="tag" style="background:'+b+';color:'+c+'">'+e.type+'</span>'+e.txt+'</p></div>';}).join('');}
+
+let RAW=[{ts:'11:20:03',type:'decision',msg:'chose Supabase'},{ts:'11:05:41',type:'debug',msg:'[harness] vite hmr update /src/RecipeList.tsx'},{ts:'10:40:12',type:'spec',msg:'PRD updated — added favorites'},{ts:'09:00:00',type:'spec',msg:'PRD created'}];
+let filter='all';
+function renderRaw(){const r=RAW.filter(x=>filter==='all'||x.type===filter);document.getElementById('raw').innerHTML=r.map(x=>{const c=v(COLORS[x.type].c);return '<div class="raw-row"><span class="raw-ts">'+x.ts+'</span><span class="raw-type" style="color:'+c+'">'+x.type+'</span><span class="raw-msg">'+x.msg+'</span></div>';}).join('');}
+
+// FILE EDITOR (GH-style modes)
+function buildMd(){return '# agents.md\n\n## Project Intent\n'+PRD.map(s=>'### '+s.title+'\n'+s.body).join('\n\n');}
+const HISTORY=[{msg:'PRD updated — added favorites to data model',who:'/update',t:'2h ago',type:'spec'},{msg:'Logged decision: chose Supabase',who:'/log',t:'10m ago... wait', type:'decision'},{msg:'Completed "Hard constraints" section',who:'you',t:'yesterday',type:'spec'},{msg:'PRD created',who:'/spec',t:'2 days ago',type:'spec'}];
+HISTORY[1].t='1d ago';
+let fileMode='read';
+function setMode(m){fileMode=m;document.querySelectorAll('#fileseg button').forEach(b=>b.classList.toggle('on',b.dataset.m===m));renderFile();}
+function renderFile(){
+  const a=document.getElementById('file-area');
+  if(fileMode==='read'){
+    a.innerHTML='<div class="file">'+buildMd().replace(/</g,'&lt;')+'</div><p class="hint">Read-only — the safe default.</p>';
+  } else if(fileMode==='section'){
+    a.innerHTML=PRD.map(s=>'<div class="item"><p class="item-title" style="margin-bottom:8px">'+s.title+'</p><textarea class="ta">'+s.body+'</textarea><div class="save-row"><button class="gh-btn commit" onclick="say(\'Save '+s.title+' section\')">Commit section</button></div></div>').join('')+'<p class="hint">Edit content section by section. Structure stays intact.</p>';
+  } else if(fileMode==='raw'){
+    a.innerHTML='<textarea class="file-raw">'+buildMd()+'</textarea><div class="save-row"><button class="gh-btn commit" onclick="say(\'Commit raw agents.md\')">Commit changes</button><button class="gh-btn" onclick="setMode(\'read\')">Cancel</button></div><p class="hint">Full markdown control. You can break the structure commands rely on — edit carefully.</p>';
+  } else if(fileMode==='history'){
+    a.innerHTML='<div style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:6px 16px;">'+HISTORY.map(h=>{const c=v(COLORS[h.type].c);return '<div class="hist-item"><span class="hist-dot" style="background:'+c+'"></span><div style="flex:1"><p class="hist-msg">'+h.msg+'</p><p class="hist-meta">'+h.who+' &middot; '+h.t+'</p></div><button class="hist-view" onclick="say(\'Show this version of agents.md\')">View</button></div>';}).join('')+'</div><p class="hint">Every change to agents.md is tracked. View or restore any past version.</p>';
+  }
+}
+
+let lastView='features';
+function openBuild(i,from){lastView=from||'features';const f=FEATS[i];document.getElementById('build-sub').textContent='Build: '+f.name;const ctx=['Project: Recipe sharing app','Stack: Supabase (data + auth), simple email sign-in','Constraint: keep it simple — no payments'];document.getElementById('build-ctx').innerHTML=ctx.map(c=>'<div class="ctx-row"><span class="ck">&#10003;</span><span>'+c+'</span></div>').join('');document.getElementById('promptbox').value='Build the "'+f.name+'" feature for the recipe sharing app.\n\nContext (do not re-derive):\n- Stack: Supabase for data and email sign-in.\n- Keep it simple — no payments, minimal accounts.\n- Match the existing component conventions.\n\nWhat to build:\n- '+f.name+': implement the UI and the Supabase read/write it needs.\n\nWhen done, summarize your changes so I can log them.';document.querySelectorAll('.navitem').forEach(x=>x.classList.remove('active'));document.querySelectorAll('#dash .view').forEach(x=>x.classList.remove('active'));document.getElementById('view-build').classList.add('active');showChat(false);document.getElementById('dash').scrollTop=0;}
+function copyPrompt(){const t=document.getElementById('promptbox');t.select();try{document.execCommand('copy');}catch(e){}const c=document.getElementById('copied');c.style.display='inline';setTimeout(()=>c.style.display='none',1500);}
+
+function nav(view){showChat(false);document.querySelectorAll('.navitem').forEach(x=>x.classList.remove('active'));const ni=document.querySelector('.navitem[data-nav="'+view+'"]');if(ni)ni.classList.add('active');document.querySelectorAll('#dash .view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+view).classList.add('active');document.getElementById('dash').scrollTop=0;if(view==='files'){setMode('read');}}
+document.querySelectorAll('.chip').forEach(c=>{c.onclick=()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));c.classList.add('on');filter=c.dataset.f;renderRaw();};});
+
+function toggleFiles(){document.getElementById('files-sub').classList.toggle('open');document.getElementById('files-head').classList.toggle('exp');}
+function toggleMenu(e){e.stopPropagation();document.getElementById('projmenu').classList.toggle('open');}
+document.addEventListener('click',()=>document.getElementById('projmenu').classList.remove('open'));
+function pickProj(name,goal,color){document.querySelector('.switcher-btn .nm').textContent=name;document.querySelector('.switcher-btn .g').textContent=goal;document.querySelector('.switcher-btn .dot').style.background=color;document.getElementById('projmenu').classList.remove('open');}
+
+function showChat(on){document.getElementById('chat').style.display=on?'block':'none';document.getElementById('dash').style.display=on?'none':'flex';if(on)setTimeout(()=>document.getElementById('chatbox').focus(),50);}
+function addMsg(who,text){const log=document.getElementById('chatlog');const d=document.createElement('div');d.className='msg '+(who==='you'?'u':'a');d.innerHTML='<p class="who">'+(who==='you'?'You':'Unyak')+'</p><div class="bub">'+text+'</div>';log.appendChild(d);d.scrollIntoView({behavior:'smooth',block:'end'});}
+function sendChat(){const i=document.getElementById('chatbox');const q=i.value.trim();if(!q)return;addMsg('you',q);i.value='';setTimeout(()=>addMsg('unyak','(demo) I\u2019d answer from your PRD, stack, and logs.'),400);}
+function homeAsk(){const b=document.getElementById('homebox');const q=b.value.trim();if(!q)return;showChat(true);document.getElementById('chatbox').value=q;b.value='';sendChat();}
+function homeQuick(q){showChat(true);document.getElementById('chatbox').value=q;sendChat();}
+function quick(q){showChat(true);document.getElementById('chatbox').value=q;sendChat();}
+function say(t){alert('Would send to your agent:\n\n'+t);}
+document.getElementById('chatbox').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}});
+document.getElementById('homebox').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();homeAsk();}});
+
+renderPRD();renderStack();renderFeats();renderPlan();renderTimeline();renderRaw();
+</script>
+</body>
+</html>
