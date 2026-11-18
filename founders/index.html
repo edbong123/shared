@@ -31,6 +31,13 @@ main{max-width:1100px;margin:0 auto;padding:12px 20px 60px}
 a.av:hover{outline:2px solid var(--acc);outline-offset:1px}
 .name{font-weight:600}
 .school{color:var(--mute);font-size:13px}
+.home{color:var(--mute);font-weight:500;font-size:13px}
+.biz{list-style:none;margin:2px 0 0;padding:0;font-size:13px}
+.biz li{margin:1px 0}
+.biz .r{font-weight:600}
+.biz li.past{color:var(--mute)}
+.biz .pt{font-size:11px;border:1px solid var(--line);border-radius:4px;padding:0 4px;margin-left:4px}
+.biz .uv{color:var(--warn);font-size:11px;margin-left:4px}
 .why{font-size:13.5px;margin-top:4px}
 .tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .tag{font-size:11.5px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--mute);white-space:nowrap}
@@ -57,7 +64,7 @@ a.av:hover{outline:2px solid var(--acc);outline-offset:1px}
 <body>
 <header>
 <h1>US flight school founders: Top 50</h1>
-<div class="sub">Ranked by Influence x Relevance x Business. Draft, Nov 17, 2026. Ranks 31 to 50 are added or unverified. Click a photo to open the founder's LinkedIn (or school page if none). Click a row for links and notes. Star rows to build a shortlist.</div>
+<div class="sub">Ranked by Influence x Relevance x Business. Draft, Nov 17, 2026. Ranks 31 to 50 are added or unverified. Founder (XX) = home state, * = inferred from business location. Businesses listed as Role, Company (State). Click a photo to open the founder's LinkedIn (or school page if none). Click a row for links and notes. Star rows to build a shortlist.</div>
 </header>
 <div class="bar"><div class="in">
 <input type="search" id="q" placeholder="Search founder, school, state, notes">
@@ -100,6 +107,10 @@ const L="https://www.linkedin.com/in/";
 const PHOTO={
 // 1:"https://example.com/matt-liknaitzky.jpg",
 };
+
+// Businesses per founder, keyed by rank. h = home state, hb = how home state is known,
+// b = [role, company, state, current(1/0), verified(1/0)]
+const BIZ=/*BIZ*/{};
 
 // [rank, founder, school, state, key, why, voice, flag, type(P/S/A), founderLinkedIn]
 const D=[
@@ -196,7 +207,11 @@ const sts=[...new Set(D.map(d=>d.st).filter(Boolean))].sort();
 sts.forEach(s=>{const o=document.createElement("option");o.value=s;o.textContent=s;$("st").appendChild(o)});
 let onlyLI=false,onlySL=false,open=new Set();
 function save(){try{localStorage.setItem("sl",JSON.stringify([...sl]))}catch(e){}}
-function match(d,q){return !q||[d.f,d.s,d.st,d.p,d.flag].join(" ").toLowerCase().includes(q)}
+const biz=d=>(BIZ[d.n]&&BIZ[d.n].b&&BIZ[d.n].b.length)?BIZ[d.n].b:[["Role unverified",d.s,d.st,1,0]];
+const home=d=>(BIZ[d.n]&&BIZ[d.n].h)||"";
+function bizHTML(d){return `<ul class="biz">${biz(d).map(b=>`<li class="${b[3]?"":"past"}"><span class="r">${esc(b[0]||"Role unverified")}</span>, ${esc(b[1])} (${esc(b[2]||"?")})${b[3]?"":`<span class="pt">past</span>`}${b[4]?"":`<span class="uv" title="Not confirmed by a source">unverified</span>`}</li>`).join("")}</ul>`}
+function homeHTML(d){const h=home(d),hb=(BIZ[d.n]||{}).hb||"";return `<span class="home" title="${h?(hb.startsWith("inferred")?"Home state inferred from business location":"Home state"):"Home state unknown"}">(${esc(h||"?")}${h&&hb.startsWith("inferred")?"*":""})</span>`}
+function match(d,q){return !q||[d.f,d.s,d.st,home(d),d.p,d.flag,biz(d).map(b=>b.join(" ")).join(" ")].join(" ").toLowerCase().includes(q)}
 function render(){
  const q=$("q").value.toLowerCase().trim(),st=$("st").value,ty=$("ty").value,so=$("so").value;
  let r=D.filter(d=>match(d,q)&&(!st||d.st===st)&&(!ty||(ty==="F"?d.flag:d.ty.includes(ty)))&&(!onlyLI||d.li)&&(!onlySL||sl.has(d.n)));
@@ -208,7 +223,7 @@ function render(){
   const links=Object.keys(NAMES).filter(k=>ln[k]).map(k=>`<a href="${ln[k]}" target="_blank" rel="noopener">${NAMES[k]}</a>`).join("");
   const tags=[...d.ty].map(c=>`<span class="tag ${T[c][1]}">${T[c][0]}</span>`).join("")+(d.flag?`<span class="tag f">Flag</span>`:"")+(d.st?`<span class="tag">${esc(d.st)}</span>`:"");
   const photoSrc=PHOTO[d.n]?`<a href="${esc(PHOTO[d.n])}" target="_blank" rel="noopener">Pinned photo</a>`:d.li?`<a href="${d.li}" target="_blank" rel="noopener">LinkedIn profile photo</a>`:ln.team?`<a href="${ln.team}" target="_blank" rel="noopener">Team page</a> (logo shown until a photo is pinned)`:"No photo source yet";
-  return `<div class="row${open.has(d.n)?" open":""}" data-n="${d.n}"><div class="head"><div class="num">${d.n}</div><div class="who">${avatar(d)}<div><div class="name">${esc(d.f)}</div><div class="school">${esc(d.s)}</div><div class="why">${esc(d.p)}</div></div></div><div class="tags">${tags}<button class="star${sl.has(d.n)?" on":""}" data-s="${d.n}" title="Shortlist">${sl.has(d.n)?"★":"☆"}</button></div></div>
+  return `<div class="row${open.has(d.n)?" open":""}" data-n="${d.n}"><div class="head"><div class="num">${d.n}</div><div class="who">${avatar(d)}<div><div class="name">${esc(d.f)} ${homeHTML(d)}</div>${bizHTML(d)}<div class="why">${esc(d.p)}</div></div></div><div class="tags">${tags}<button class="star${sl.has(d.n)?" on":""}" data-s="${d.n}" title="Shortlist">${sl.has(d.n)?"★":"☆"}</button></div></div>
   <div class="det"><dl>${d.flag?`<dt>Flag</dt><dd>${esc(d.flag)}</dd>`:""}<dt>Photo</dt><dd>${photoSrc}</dd><dt>Founder</dt><dd>${d.li?`<a href="${d.li}" target="_blank" rel="noopener">LinkedIn (professional)</a>`:"No LinkedIn found yet"}</dd><dt>School links</dt><dd class="links">${links||"None found yet"}</dd></dl></div></div>`}).join(""):'<div class="empty">No matches</div>';
 }
 $("list").addEventListener("click",e=>{
