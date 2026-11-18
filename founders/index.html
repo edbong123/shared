@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>US Flight School Founders: Top 50</title>
+<style>
+:root{--bg:#fafaf8;--card:#fff;--ink:#1c1c1a;--mute:#6b6b66;--line:#e4e3de;--acc:#1f4fd8;--ok:#1a7f4b;--warn:#b45309;--bad:#b42318}
+@media (prefers-color-scheme:dark){:root{--bg:#161614;--card:#1f1f1d;--ink:#ecebe6;--mute:#9a9a93;--line:#34342f;--acc:#7da2ff;--ok:#4cc98a;--warn:#f0a050;--bad:#ff8a7a}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:20px 20px 8px;max-width:1100px;margin:0 auto}
+h1{margin:0 0 4px;font-size:22px}
+.sub{color:var(--mute);font-size:13px}
+.bar{position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);padding:10px 20px;z-index:5}
+.bar .in{max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input,select,button{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+input[type=search]{flex:1;min-width:180px}
+button{cursor:pointer}
+button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+main{max-width:1100px;margin:0 auto;padding:12px 20px 60px}
+.count{color:var(--mute);font-size:13px;margin:6px 0 10px}
+.row{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;overflow:hidden}
+.head{display:grid;grid-template-columns:32px 1fr auto;gap:12px;padding:12px 14px;cursor:pointer;align-items:start}
+.num{font-weight:700;font-size:18px;color:var(--mute);text-align:right}
+.who{display:flex;gap:12px;align-items:flex-start}
+.av{position:relative;flex:none;width:76px;height:76px;border-radius:10px;color:#fff;font-weight:600;display:flex;align-items:center;justify-content:center;font-size:26px;overflow:hidden;text-decoration:none}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:inherit}
+.av.logo img{object-fit:contain;padding:10px;background:#fff}
+.av .src{position:absolute;right:3px;bottom:3px;font-size:9px;font-weight:600;line-height:1;padding:2px 4px;border-radius:4px;background:rgba(0,0,0,.55);color:#fff;z-index:2}
+a.av:hover{outline:2px solid var(--acc);outline-offset:1px}
+.name{font-weight:600}
+.school{color:var(--mute);font-size:13px}
+.why{font-size:13.5px;margin-top:4px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tag{font-size:11.5px;padding:2px 8px;border-radius:99px;border:1px solid var(--line);color:var(--mute);white-space:nowrap}
+.tag.p{color:var(--ok);border-color:var(--ok)}
+.tag.s{color:var(--acc);border-color:var(--acc)}
+.tag.a{color:var(--warn);border-color:var(--warn)}
+.tag.f{color:var(--bad);border-color:var(--bad)}
+.det{display:none;padding:0 14px 14px 70px;font-size:13.5px;border-top:1px dashed var(--line)}
+.row.open .det{display:block}
+.det dl{margin:10px 0 0;display:grid;grid-template-columns:110px 1fr;gap:6px 10px}
+.det dt{color:var(--mute)}
+.det dd{margin:0}
+.det a,.links a{color:var(--acc);text-decoration:none}
+.links a{margin-right:10px}
+.det a:hover,.links a:hover{text-decoration:underline}
+.star{font-size:18px;background:none;border:0;padding:0 4px;color:var(--mute)}
+.star.on{color:#e0a800}
+.empty{color:var(--mute);padding:30px;text-align:center}
+#sl{display:none;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:13.5px}
+#sl pre{white-space:pre-wrap;margin:6px 0 0;font:inherit}
+@media(max-width:640px){.head{grid-template-columns:32px 1fr}.tags{grid-column:2;justify-content:flex-start}.det{padding-left:14px}.det dl{grid-template-columns:1fr}.av{width:60px;height:60px;font-size:20px}}
+</style>
+</head>
+<body>
+<header>
+<h1>US flight school founders: Top 50</h1>
+<div class="sub">Ranked by Influence x Relevance x Business. Draft, Nov 17, 2026. Ranks 31 to 50 are added or unverified. Click a photo to open the founder's LinkedIn (or school page if none). Click a row for links and notes. Star rows to build a shortlist.</div>
+</header>
+<div class="bar"><div class="in">
+<input type="search" id="q" placeholder="Search founder, school, state, notes">
+<select id="st"><option value="">All states</option></select>
+<select id="ty"><option value="">All types</option><option value="P">Pilot partner</option><option value="S">Scale prospect</option><option value="A">Advisor / investor</option><option value="F">Has a flag</option></select>
+<select id="so"><option value="rank">Sort: rank</option><option value="name">Sort: founder</option><option value="school">Sort: school</option></select>
+<button id="li">Has LinkedIn</button>
+<button id="sh">Shortlist (0)</button>
+</div></div>
+<main>
+<div id="sl"></div>
+<div class="count" id="ct"></div>
+<div id="list"></div>
+</main>
+<script>
+const S={
+sling:{site:"https://www.slingpilotacademy.com/",team:"https://www.slingpilotacademy.com/our-team/",fb:"https://www.facebook.com/slingpilotacademy",ig:"https://www.instagram.com/slingpilotacademy",li:"https://www.linkedin.com/school/sling-pilot-academy",yt:"https://www.youtube.com/c/SlingPilotAcademy",x:"https://twitter.com/SlingPilot"},
+epic:{site:"https://epicflightacademy.com/",team:"https://epicflightacademy.com/about-us/",fb:"https://www.facebook.com/epicflightacademy",ig:"https://www.instagram.com/epicflightacademy",li:"https://www.linkedin.com/company/epic-flight-academy",yt:"https://www.youtube.com/c/EpicAviationEpicFlightAcademy",x:"https://www.twitter.com/epicfltacademy",tt:"https://www.tiktok.com/@epicflightacademy"},
+usaa:{site:"https://www.usaviationacademy.com/",team:"https://www.usaviationacademy.com/meet-our-staff/",fb:"https://facebook.com/USAviationAcademy",ig:"https://www.instagram.com/usaviationacademy/",li:"https://linkedin.com/company/us-aviation"},
+thrust:{site:"https://thrustflight.com/",team:"https://www.thrustflight.com/meet-the-team/",fb:"https://www.facebook.com/ThrustFlight/",ig:"https://www.instagram.com/thrustflight/",li:"https://www.linkedin.com/company/thrust-flight/",yt:"https://www.youtube.com/channel/UCkM9Q2yMZh6ix7TeVy0VH7A",tt:"https://www.tiktok.com/@thrustflight"},
+infinity:{site:"https://infinityflightgroup.com/",team:"https://infinityflightgroup.com/our-instructors/"},
+blue:{site:"https://www.bluelineaviation.com/",team:"https://www.bluelineaviation.com/about/executive_team",fb:"http://www.facebook.com/bluelineaviation",ig:"https://www.instagram.com/bluelineaviation/",yt:"https://www.youtube.com/channel/UCZznbbTHHZMksnXPklVepGw"},
+vwa:{site:"https://www.flyvwa.com/",team:"https://www.flyvwa.com/about/our-story",fb:"https://www.facebook.com/venturewestaviation",ig:"https://www.instagram.com/flyvwa/",li:"https://www.linkedin.com/company/venturewestaviation/",x:"https://x.com/flyventurewest",tt:"https://www.tiktok.com/@flyvwa"},
+air:{site:"https://www.airventuresri.com/",team:"https://www.dougauclair.com",fb:"https://www.facebook.com/AIRventures/",ig:"https://www.instagram.com/airventuresri/"},
+leo:{site:"https://leopardaviation.com/",team:"https://leopardaviation.com/about-us/",fb:"https://www.facebook.com/LeopardAviationKSDL",ig:"https://www.instagram.com/leopardaviationllc/"},
+sun:{site:"https://suncityaviation.com/",team:"https://suncityaviation.com/our-team/",fb:"https://www.facebook.com/SunCityAviationAcademy",ig:"https://www.instagram.com/suncity_aviation/",li:"https://www.linkedin.com/company/sun-city-aviation-academy/",yt:"https://www.youtube.com/@suncityaviation/"},
+avier:{site:"https://avierflight.com/",fb:"https://www.facebook.com/avierflight/",ig:"https://www.instagram.com/avierflightschool/",li:"https://www.linkedin.com/company/avier-flight-school"},
+coast:{site:"https://iflycoast.com/",team:"https://iflycoast.com/about-coast/",fb:"https://www.facebook.com/coastflight",ig:"https://www.instagram.com/coastflighttraining/",yt:"https://www.youtube.com/channel/UCtwXf-mlWXpZtN6kzlPoqLw"},
+sky:{site:"https://skyborne.com/",team:"https://skyborne.com/about-skyborne/"},
+tfa:{site:"http://www.theflightacademy.com/",team:"http://www.theflightacademy.com/aboutus.html"},
+river:{site:"https://riversideflightcenter.com"},
+aa:{site:"https://www.aviationadventures.com/"},
+sav:{site:"https://www.savannahaviation.com/",team:"https://www.savannahaviation.com/our-team",fb:"https://www.facebook.com/savannahaviationflightschool",ig:"https://www.instagram.com/savannah.aviation/"}
+};
+const L="https://www.linkedin.com/in/";
+
+// Manual photo overrides, keyed by rank. Paste a direct, hotlinkable image URL
+// (e.g. the headshot src from the school's team page) to pin a person's photo.
+// These are tried first, before the LinkedIn photo and the school logo.
+const PHOTO={
+// 1:"https://example.com/matt-liknaitzky.jpg",
+};
+
+// [rank, founder, school, state, key, why, voice, flag, type(P/S/A), founderLinkedIn]
+const D=[
+[1,"Matt Liknaitzky","Sling Pilot Academy","CA","sling","Inc. 5000 honoree, already runs NAVI AI and sims in training; best pilot partner, pitch as complement to NAVI","Wants training safer, more effective, more engaging; keeps cost down with sims plus self-study","","P",L+"matt-liknaitzky/"],
+[2,"Danny Perna","Epic Flight Academy","FL","epic","Self-described largest Part 141 school, 11 campuses, United Aviate and USAF pipelines","Says student learning styles shifted with technology, so Epic added motion sims; trains own instructors to fix the shortage","","PSA",L+"danny-perna-a692781a/"],
+[3,"Mike Sykes","US Aviation Academy","TX","usaa","130+ aircraft, Redbird and Frasca sims, several airline pathways; scale sales prospect","Mostly an accelerated, accessible career pitch; no training philosophy found","","S",L+"mike-sykes-4706a970/"],
+[4,"Patrick Arnzen","Thrust Flight","TX","thrust","About $18.8M revenue 2024 (Latka estimate), United Aviate 2026","Says many schools lack structure and support; builds for career switchers and people who cannot wait","Bought the business 2010 to 2012; Stevenson co-founded 2006. Confirm he counts as founder.","S",L+"patrick-arnzen/"],
+[5,"Sherman Gardner","In The Pattern","TX","","Repeat AOPA national best school, fast hours growth; advisor and pilot partner","Puts experience and trust over price and volume; will counsel students against overspending","Website not confirmed","PA",L+"shermangardner/"],
+[6,"Gregory John","Infinity Flight Group","NJ","infinity","60+ aircraft in about 10 years, AA Cadet partner, expanding to FL and VT; testified to House VA committee Feb 2024","Favors incremental expansion because aviation is cyclical; aims at outcomes that meet airline hiring bars","","S",L+"gregory-john-7a92b16/"],
+[7,"Jean d'Assonville","Sling Pilot Academy","CA","sling","Co-founder and co-CEO; second door into Sling","Not sourced yet","","",""],
+[8,"Darren Gardner","In The Pattern","TX","","Co-owner of award-winning school, 3 locations","Not sourced yet","","P",""],
+[9,"Trey Walters","Blue Line Aviation","NC","blue","Large Piper fleet order","Not sourced yet","CEO retirement reported; site names no founders","",L+"treywaltersaviation/"],
+[10,"Lee Woodward","Skyborne Airline Academy","FL","sky","Delta Propel academy, 60+ aircraft","Not sourced yet","Sold to Excolere Oct 2026","",""],
+[11,"Wayne Toddun","Sling Pilot Academy","CA","sling","Co-CEO who drove the scale-up; investor-advisor angle","Not sourced yet","","A",L+"wayne-toddun-9b29931/"],
+[12,"Tyler Johnson","Venture West Aviation","AZ","vwa","Grew from one aircraft; mission names new technology","Not sourced yet","","P",L+"tyler-johnson-27b95a115/"],
+[13,"Mark Taylor","US Aviation Academy","TX","usaa","Co-founder, relationship lead, sat on a university aviation board","Not sourced yet","","",L+"mark-taylor-6a925894/"],
+[14,"Amy Perna","Epic Flight Academy","FL","epic","Co-founder (started Epic in 1999 with Danny); current role unverified","Not sourced yet","","",""],
+[15,"Lute Atieh","FlyTech + ATD Flight Systems","MO","","Consolidator, 25 aircraft, 5 locations; investor-advisor","Not sourced yet","","A",L+"lute-atieh/"],
+[16,"Doug Auclair","Air Ventures Flying School","RI","air","AOPA 2025 regional best school, 5x NAFI Master CFI","Not sourced yet","","",L+"doug-auclair-19a828204/"],
+[17,"Kelsey Walters","Blue Line Aviation","NC","blue","Co-founder; verify role","Not sourced yet","LinkedIn is a name match only","",L+"kelsey-walters/"],
+[18,"Glen Pace","Majestic Aviation","MS","","FSANA chairman; channel to school owners","Not sourced yet","Founder unverified","",""],
+[19,"Bruce McCall","Triad Aviation Academy","NC","","FSANA vice chair","Not sourced yet","Founder unverified","",""],
+[20,"Jim White","Arizona Aero-Tech","AZ","","FSANA secretary","Not sourced yet","Founder unverified","",""],
+[21,"Tom Noon","Leopard Aviation","AZ","leo","10x monthly hours growth in year one; small pilot partner","Not sourced yet","","P",""],
+[22,"Michael Ojo","Lookup Flight Academy","GA","","New Part 141, $1M scholarship pledge","Not sourced yet","Verify founder title (LinkedIn says CEO and Founder)","",L+"mikeojo/"],
+[23,"Luke Poulos","Sun City Aviation Academy","FL","sun","AOPA 2025 Southern best school","Not sourced yet","","",""],
+[24,"Jack Parrish","Parrish Aviation","TX","","Confirmed president and founder, Part 141, Dallas and Fort Worth; FSANA/FSAI board","Podcast pitch stresses one-on-one orientation and accessibility","","",L+"jack-parrish-026905210/"],
+[25,"Paul Beaulieu","Avier Flight School","MA","avier","FSAI director, AOPA 2026 Distinguished; co-owner with Esteban Monterroso","Not sourced yet","Founder unconfirmed; school founded 2014","",""],
+[26,"Alex Hamlin","Flyt Aviation","GA","","Founded 2020, scaled to about $7M revenue per his LinkedIn","Not sourced yet","LinkedIn lists Flyt as past; likely left","",L+"alex-hamlin/"],
+[27,"David Lines","Venture West Aviation","AZ","vwa","Co-founder and COO","Not sourced yet","","",""],
+[28,"Eric Noon","Leopard Aviation","AZ","leo","Co-founder; runs locations","Not sourced yet","","",""],
+[29,"Will Dryden","Coast Flight Training","CA","coast","Full-motion sim, AA Cadet","Not sourced yet","LinkedIn lists Coast as past; leadership conflicts in sources","",L+"willdryden/"],
+[30,"Peg Ballou","Ballou Skies Aviation","OH","","AOPA 2025 Great Lakes best school","Not sourced yet","Founder unverified; no LinkedIn match","",""],
+[31,"John Fiscus","The Flight Academy","","tfa","Co-founder of a respected Cirrus-focused school, 20+ years","Podcast Dec 2025 on how the school was built; content not reviewed","","",""],
+[32,"Yuri Milner","Riverside Flight Center","OK","river","Founder, 25 years, claims 90% completion rate","Student-first, real-world-conditions training","","",""],
+[33,"Paul Wynns","Flex Air","CA","","Co-founder; AOPA 2025 Pacific best school","Calls the school a labor of love built around representation","Partner Charlie Copeland may be the founder","",""],
+[34,"Jamie Pittman","Discover Flight","","","Founder of a grassroots flight school; EAA podcast guest","Grassroots aviation focus","","",""],
+[35,"Kenneth Thomas (Kenny T)","Legacy Flight Academy","","","Co-founder and podcast host; media reach","Hosts a pilot-stories podcast; flight training views not reviewed","","",""],
+[36,"Stuart Stevenson","Thrust Flight","TX","thrust","2006 co-founder; BBB lists him as owner","Not sourced yet","Active status unverified","",""],
+[37,"Amanda Aldea","Carolina Sky Flight Training","SC","","FSANA director","Not sourced yet","Founder unverified","",""],
+[38,"Jonathan Shorey","Skyline Aviation","TX","","FSANA director","Not sourced yet","Founder unverified","",""],
+[39,"Chris Erlanson","Tennessee Flight Training","TN","","FSANA director","Not sourced yet","Founder unverified","",""],
+[40,"Thomas Trotter","Vegas Aviation","NV","","FSAI director","Not sourced yet","Founder unverified","",""],
+[41,"Mike Smith","Mike Smith Aviation","CA","","AOPA 2025 Pacific best CFI","Not sourced yet","Founder unverified","",""],
+[42,"Dave Hinz","Great Lakes Flight Center","NY","","AOPA 2025 Distinguished","Not sourced yet","Founder unverified","",""],
+[43,"William Hays","ATD Flight Systems","MO","","Founded 1996; exited, advisor only","Not sourced yet","","A",""],
+[44,"Tom Misner","Skyborne","UK/FL","sky","Co-founder and chairman","Not sourced yet","Acquired","",""],
+[45,"Ian Cooper","Skyborne","UK/FL","sky","Co-founder and COO","Not sourced yet","Acquired","",""],
+[46,"Founder TBD","NoVA Pilots","VA","","AOPA 2026 national best school","Not sourced yet","Website domain listed for sale; check status","",""],
+[47,"Bob Hepp","Aviation Adventures","VA","aa","AOPA 2025 and 2026 award school, 5 locations","Not sourced yet","Founder name needs confirming","",""],
+[48,"Founder TBD","Flight Ventures Aviation Academy","","","$5.79M raised","Not sourced yet","Founder name missing","",""],
+[49,"Founder TBD","Flight Time","FL","","Seed funded","Not sourced yet","Founder name missing","",""],
+[50,"Founder TBD","Savannah Aviation","GA","sav","Home of the 2025 national best CFI; parent company Spring Air","Not sourced yet","No individual named on site","",""]
+].map(r=>({n:r[0],f:r[1],s:r[2],st:r[3],k:r[4],why:r[5],voice:r[6],flag:r[7],ty:r[8],li:r[9]}));
+const PITCH=["Runs Sling Pilot Academy in California, an Inc. 5000 honoree that already trains with its own NAVI AI tool and flight simulators. Best pilot partner: pitch us as the complement to NAVI. He wants training safer, more engaging and cheaper.", "Started Epic Flight Academy in 1999 with one Cessna 152 and now leads 180+ staff, 11 campuses, a Part 141 school, an aircraft mechanic school and an FBO. Has United Aviate and Air Force pipelines. Added motion simulators because student learning styles changed, and trains his own instructors to ease the shortage.", "Started US Aviation Academy in Denton, TX in 2006 with 8 staff and 6 aircraft. Now 130+ aircraft, six training bases, an A&P mechanic school, Redbird and Frasca simulators, and United, Southwest and Envoy pathways. Pitch: fast, affordable airline career.", "Runs Thrust Flight (Addison, TX) across 4 campuses, with pilot and A&P mechanic programs, a Phoenix campus opened Aug 2025 and a United Aviate path. About $18.8M revenue in 2024 (estimate). Says many schools lack structure and builds for career changers. Bought the business 2010 to 2012.", "Runs In The Pattern Flight School in Texas, a repeat AOPA national best-school winner with 3 locations. Puts experience and trust ahead of price and would advise students against overspending.", "Built Infinity Flight Group (Ewing, NJ) into 50 to 60+ aircraft (Cessna 172s, Piper Seminoles) in about 10 years. Has Part 141 and 135 certificates, an American Airlines cadet link and expansion to FL and VT. Testified to a House committee in Feb 2024 on veteran flight benefits.", "Co-founder and co-CEO of Sling Pilot Academy (CA, Inc. 5000, NAVI AI, simulators). A second way into the best pilot partner on the list.", "Co-owner of In The Pattern Flight School in Texas, an AOPA national award winner with 3 locations.", "Leads Blue Line Aviation in North Carolina, which placed a large Piper aircraft order. A CEO retirement was reported, so check before reaching out.", "Co-founded Skyborne Airline Academy (Florida), a Delta Propel academy with 60+ aircraft. Sold to Excolere in Oct 2026, so he may no longer be the contact.", "Co-CEO who drove Sling Pilot Academy's growth (CA, Inc. 5000, NAVI AI). Good advisor or investor contact.", "Built Venture West Aviation (Mesa, AZ) from one aircraft since 2020, now 200+ staff by one estimate. Sells an 11-month zero-to-airline program and names new technology in its mission, so a likely pilot partner.", "Co-founder of US Aviation Academy (Denton, TX, 130+ aircraft, six bases). Leads relationships and has served on a university aviation association board.", "Co-founded Epic Flight Academy (FL, 11 campuses, 180+ staff) with Danny in 1999. Her current role is unconfirmed.", "Runs ATD Flight Systems and the FlyTech schools in Missouri: 25 aircraft across 5 locations. Also founded Annovox. Strong advisor or investor contact.", "Owns Air Ventures Flying School in Rhode Island. Won an AOPA regional best-school award in 2025 and is a five-time NAFI Master CFI.", "Co-founder of Blue Line Aviation in North Carolina (large Piper order). Her role needs checking.", "Leads Majestic Aviation in Mississippi and chairs the Flight School Association of North America, a direct line to many school owners. Not yet confirmed as a founder.", "Leads Triad Aviation Academy in North Carolina and is vice chair of the Flight School Association of North America. Not yet confirmed as a founder.", "Leads Arizona Aero-Tech and is secretary of the Flight School Association of North America. Not yet confirmed as a founder.", "Co-founded Leopard Aviation (Arizona), which grew monthly flight hours tenfold in its first year. A nimble pilot partner.", "Founded Lookup Flight Academy in Georgia, a new Part 141 school that pledged $1M in scholarships.", "Leads Sun City Aviation Academy in Florida, winner of AOPA's 2025 Southern best-school award.", "Founder and president of Parrish Aviation Flight Academy in Dallas-Fort Worth, a Part 141 school. Sits on flight school association boards. Stresses one-on-one attention and accessibility.", "Co-owner of Avier Flight School (Massachusetts, founded 2014, Beverly airport). Named AOPA Distinguished in 2026 and an industry association director.", "Founded Flyt Aviation in Georgia from a $3K personal investment to about $7M annual revenue and 60+ staff, per his LinkedIn. It now lists Flyt as past, so likely left.", "Co-founder and COO of Venture West Aviation (Mesa, AZ, 11-month zero-to-airline program). A second contact there.", "Co-founder of Leopard Aviation (Arizona, tenfold monthly hours growth in year one). Runs its locations.", "Led Coast Flight Training in San Diego, with a full-motion simulator and an American Airlines cadet path. Sources disagree on who leads it, and his LinkedIn lists it as past.", "Leads Ballou Skies Aviation in Ohio, winner of AOPA's 2025 Great Lakes award. Founder not yet confirmed.", "Co-founder of The Flight Academy, a respected Cirrus-focused school with 20+ years of history. Discussed how it was built on a podcast in Dec 2025.", "Founded Riverside Flight Center in Oklahoma 25 years ago and reports a 90% completion rate. Focuses on students and real-world conditions.", "Co-founded Flex Air in California, winner of AOPA's 2025 Pacific best-school award. Calls it a labor of love built around representation.", "Founder of Discover Flight, a grassroots flight school, and a guest on an EAA podcast.", "Co-founder of Legacy Flight Academy and host of a pilot-stories podcast, so he has media reach.", "Co-founded Thrust Flight (TX, 4 campuses, about $18.8M revenue 2024 estimate) in 2006. Still listed as an owner. Current role unverified.", "Director at the Flight School Association of North America and leads Carolina Sky Flight Training in South Carolina. Founder status unconfirmed.", "Director at the Flight School Association of North America and leads Skyline Aviation in Texas. Founder status unconfirmed.", "Director at the Flight School Association of North America and leads Tennessee Flight Training. Founder status unconfirmed.", "Director at a flight school association and leads Vegas Aviation in Nevada. Founder status unconfirmed.", "Runs Mike Smith Aviation in California and won AOPA's 2025 Pacific best-CFI award. Founder status unconfirmed.", "Leads Great Lakes Flight Center in New York, named AOPA Distinguished in 2025. Founder status unconfirmed.", "Founded ATD Flight Systems (Missouri, simulator maker) in 1996 and has since exited. An advisor rather than a buyer.", "Co-founder and chairman of Skyborne Airline Academy (FL, Delta Propel, 60+ aircraft). Acquired by Excolere in Oct 2026.", "Co-founder and COO of Skyborne Airline Academy (FL, Delta Propel, 60+ aircraft). Acquired by Excolere in Oct 2026.", "NoVA Pilots in Virginia, named AOPA's best flight school in the nation for 2026. Founder unknown and its website domain is listed for sale.", "Founder of Aviation Adventures, a Virginia school with 5 locations (Manassas, Leesburg, Warrenton, Stafford, Winchester) and AOPA awards in 2025 and 2026. Name still to confirm.", "Flight Ventures Aviation Academy raised $5.79M. Founder not yet identified.", "Flight Time (Florida) is a seed-funded flight school. Founder not yet identified.", "Savannah Aviation in Georgia, home of AOPA's 2025 national best CFI. Owned by parent company Spring Air, no individual named."];
+D.forEach((d,i)=>d.p=PITCH[i]);
+const T={P:["Pilot partner","p"],S:["Scale prospect","s"],A:["Advisor / investor","a"]};
+const NAMES={site:"School site",team:"Team page",fb:"Facebook",ig:"Instagram",li:"School LinkedIn",yt:"YouTube",x:"X",tt:"TikTok"};
+let sl=new Set();try{sl=new Set(JSON.parse(localStorage.getItem("sl")||"[]"))}catch(e){}
+const $=id=>document.getElementById(id);
+const ini=d=>d.f.startsWith("Founder")?"?":d.f.replace(/\(.*\)/,"").trim().split(/\s+/).map(w=>w[0]).slice(0,2).join("").toUpperCase();
+const col=d=>"hsl("+((d.n*47)%360)+",45%,38%)";
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const host=u=>{try{return new URL(u).hostname.replace(/^www\./,"")}catch(e){return ""}};
+const liHandle=u=>(u.match(/linkedin\.com\/in\/([^/?#]+)/)||[])[1]||"";
+
+// Photo sources, tried in order until one loads:
+// 1. manual override  2. founder LinkedIn photo  3. school logo  4. initials (no image)
+function photos(d){
+ const out=[];
+ if(PHOTO[d.n])out.push([PHOTO[d.n],"photo","Photo"]);
+ const h=d.li&&liHandle(d.li);
+ if(h)out.push(["https://unavatar.io/linkedin/"+h+"?fallback=false","photo","LinkedIn"]);
+ const site=(S[d.k]||{}).site;
+ if(site)out.push(["https://www.google.com/s2/favicons?domain="+host(site)+"&sz=256","logo","Logo"]);
+ return out;
+}
+// Where the avatar links: founder LinkedIn, else team page, else school site
+function profile(d){const ln=S[d.k]||{};return d.li||ln.team||ln.site||""}
+
+function nx(img){
+ const l=JSON.parse(img.dataset.l),i=+img.dataset.i+1,av=img.parentNode,tag=av.querySelector(".src");
+ if(i<l.length){img.dataset.i=i;av.classList.toggle("logo",l[i][1]==="logo");if(tag)tag.textContent=l[i][2];img.src=l[i][0]}
+ else{img.remove();if(tag)tag.remove();av.classList.remove("logo")}
+}
+function avatar(d){
+ const l=photos(d),href=profile(d),tagName=href?"a":"div";
+ const attrs=href?` href="${esc(href)}" target="_blank" rel="noopener" title="${esc(d.li?"Open LinkedIn":"Open school page")}"`:"";
+ const img=l.length?`<img src="${esc(l[0][0])}" alt="${esc(d.f)}" loading="lazy" referrerpolicy="no-referrer" data-i="0" data-l="${esc(JSON.stringify(l))}" onerror="nx(this)"><span class="src">${l[0][2]}</span>`:"";
+ return `<${tagName} class="av${l.length&&l[0][1]==="logo"?" logo":""}" style="background:${col(d)}"${attrs}>${ini(d)}${img}</${tagName}>`;
+}
+
+const sts=[...new Set(D.map(d=>d.st).filter(Boolean))].sort();
+sts.forEach(s=>{const o=document.createElement("option");o.value=s;o.textContent=s;$("st").appendChild(o)});
+let onlyLI=false,onlySL=false,open=new Set();
+function save(){try{localStorage.setItem("sl",JSON.stringify([...sl]))}catch(e){}}
+function match(d,q){return !q||[d.f,d.s,d.st,d.p,d.flag].join(" ").toLowerCase().includes(q)}
+function render(){
+ const q=$("q").value.toLowerCase().trim(),st=$("st").value,ty=$("ty").value,so=$("so").value;
+ let r=D.filter(d=>match(d,q)&&(!st||d.st===st)&&(!ty||(ty==="F"?d.flag:d.ty.includes(ty)))&&(!onlyLI||d.li)&&(!onlySL||sl.has(d.n)));
+ if(so==="name")r.sort((a,b)=>a.f.localeCompare(b.f));else if(so==="school")r.sort((a,b)=>a.s.localeCompare(b.s));else r.sort((a,b)=>a.n-b.n);
+ $("ct").textContent=r.length+" of "+D.length+" shown";
+ $("sh").textContent="Shortlist ("+sl.size+")";$("sh").className=onlySL?"on":"";
+ $("list").innerHTML=r.length?r.map(d=>{
+  const ln=S[d.k]||{};
+  const links=Object.keys(NAMES).filter(k=>ln[k]).map(k=>`<a href="${ln[k]}" target="_blank" rel="noopener">${NAMES[k]}</a>`).join("");
+  const tags=[...d.ty].map(c=>`<span class="tag ${T[c][1]}">${T[c][0]}</span>`).join("")+(d.flag?`<span class="tag f">Flag</span>`:"")+(d.st?`<span class="tag">${esc(d.st)}</span>`:"");
+  const photoSrc=PHOTO[d.n]?`<a href="${esc(PHOTO[d.n])}" target="_blank" rel="noopener">Pinned photo</a>`:d.li?`<a href="${d.li}" target="_blank" rel="noopener">LinkedIn profile photo</a>`:ln.team?`<a href="${ln.team}" target="_blank" rel="noopener">Team page</a> (logo shown until a photo is pinned)`:"No photo source yet";
+  return `<div class="row${open.has(d.n)?" open":""}" data-n="${d.n}"><div class="head"><div class="num">${d.n}</div><div class="who">${avatar(d)}<div><div class="name">${esc(d.f)}</div><div class="school">${esc(d.s)}</div><div class="why">${esc(d.p)}</div></div></div><div class="tags">${tags}<button class="star${sl.has(d.n)?" on":""}" data-s="${d.n}" title="Shortlist">${sl.has(d.n)?"★":"☆"}</button></div></div>
+  <div class="det"><dl>${d.flag?`<dt>Flag</dt><dd>${esc(d.flag)}</dd>`:""}<dt>Photo</dt><dd>${photoSrc}</dd><dt>Founder</dt><dd>${d.li?`<a href="${d.li}" target="_blank" rel="noopener">LinkedIn (professional)</a>`:"No LinkedIn found yet"}</dd><dt>School links</dt><dd class="links">${links||"None found yet"}</dd></dl></div></div>`}).join(""):'<div class="empty">No matches</div>';
+}
+$("list").addEventListener("click",e=>{
+ const s=e.target.closest(".star");
+ if(s){e.stopPropagation();const n=+s.dataset.s;sl.has(n)?sl.delete(n):sl.add(n);save();render();showSL();return}
+ if(e.target.closest("a"))return;
+ const row=e.target.closest(".row");if(!row)return;
+ const n=+row.dataset.n;open.has(n)?open.delete(n):open.add(n);row.classList.toggle("open");
+});
+["q","st","ty","so"].forEach(i=>$(i).addEventListener("input",render));
+$("li").onclick=()=>{onlyLI=!onlyLI;$("li").className=onlyLI?"on":"";render()};
+$("sh").onclick=()=>{onlySL=!onlySL;render();showSL()};
+function showSL(){
+ const box=$("sl");
+ if(!onlySL||!sl.size){box.style.display="none";return}
+ const txt=D.filter(d=>sl.has(d.n)).map(d=>d.n+". "+d.f+", "+d.s+(d.li?" "+d.li:"")).join("\n");
+ box.style.display="block";
+ box.innerHTML='<b>Shortlist</b> <button id="cp">Copy</button><pre>'+esc(txt)+'</pre>';
+ $("cp").onclick=()=>{try{navigator.clipboard.writeText(txt).then(()=>{$("cp").textContent="Copied"},()=>{})}catch(e){}};
+}
+render();showSL();
+</script>
+</body>
+</html>
